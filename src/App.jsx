@@ -16,7 +16,6 @@ When given a business problem, extract and structure it into:
 4. Key Stakeholders (role + interest)
 5. Assumptions
 6. Out of Scope items
-
 Be concise, professional, and use standard BA terminology. Format clearly with headers.`,
   },
   {
@@ -25,18 +24,16 @@ Be concise, professional, and use standard BA terminology. Format clearly with h
     emoji: "📄",
     accent: "#6366F1",
     tagline: "Generate professional BRD sections instantly",
-    placeholder: "Paste your requirements or describe the project… e.g. 'Create BRD section for an NHS patient discharge system with automated notifications'",
+    placeholder: "Paste your requirements or describe the project…",
     systemPrompt: `You are a senior Business Analyst who writes world-class Business Requirements Documents (BRDs).
 When given a project description or requirements, generate a professional BRD section including:
-
 1. Executive Summary
 2. Project Objectives (SMART format)
 3. Business Requirements (detailed, numbered)
 4. Process Overview (as-is vs to-be)
 5. Success Criteria (measurable KPIs)
 6. Risk Register (top 3 risks with mitigation)
-
-Use formal British English. Reference NHS/finance/enterprise context where relevant. Be thorough and professional.`,
+Use formal British English. Be thorough and professional.`,
   },
   {
     id: "interview",
@@ -45,22 +42,13 @@ Use formal British English. Reference NHS/finance/enterprise context where relev
     accent: "#F59E0B",
     tagline: "Practice BA interview questions for UK & Gulf roles",
     placeholder: "Ask for interview prep… e.g. 'Give me a tough BA interview question about stakeholder management'",
-    systemPrompt: `You are an expert BA interview coach who has helped hundreds of candidates land Business Analyst roles at top UK and Gulf firms (NHS, Scottish Widows, Aegon, HSBC, Emirates, QatarEnergy).
-
-You help candidates:
-- Answer tough BA interview questions using STAR method
-- Prepare for competency-based questions
-- Handle tricky stakeholder scenario questions
-- Understand what UK and Gulf recruiters look for
-- Frame their experience compellingly
-
+    systemPrompt: `You are an expert BA interview coach for UK and Gulf firms (NHS, Scottish Widows, Aegon, HSBC, Emirates, QatarEnergy).
 When asked a question, provide:
 1. What the interviewer is really testing
 2. A strong model answer using STAR
 3. 2-3 key phrases that impress
 4. What NOT to say
-
-Be encouraging but honest. Focus on Business Analysis skills: requirements, BPMN, stakeholder management, Agile/Waterfall, tools (Jira, Power BI, Visio).`,
+Focus on: requirements, BPMN, stakeholder management, Agile/Waterfall, Power BI, Jira.`,
   },
   {
     id: "stakeholder",
@@ -70,31 +58,16 @@ Be encouraging but honest. Focus on Business Analysis skills: requirements, BPMN
     tagline: "Roleplay difficult stakeholder conversations",
     placeholder: "Set the scene… e.g. 'You are a resistant NHS IT Director who thinks the new system is unnecessary'",
     systemPrompt: `You are a roleplay engine that simulates difficult stakeholders for Business Analyst training.
-
-When given a stakeholder persona, you BECOME that person — staying in character throughout the conversation. Common personas include:
-- Resistant IT Director who doesn't want change
-- Impatient C-suite exec who wants shortcuts  
-- Confused end-user scared of new technology
-- Territorial department head protecting budget
-- Sceptical finance manager questioning ROI
-
-Stay in character. Be realistically difficult but not impossible. Give the BA (the user) a genuine challenge.
-After they respond, react authentically as that stakeholder would.
-Occasionally offer small concessions if the BA makes strong points.
-
-Start by introducing yourself as the stakeholder and stating your concern.`,
+When given a stakeholder persona, BECOME that person and stay in character. Be realistically difficult but not impossible.
+Start by introducing yourself as the stakeholder and stating your concern.
+Occasionally offer small concessions if the BA makes strong points.`,
   },
 ];
 
 async function callClaude(systemPrompt, messages) {
-  headers: { "Content-Type": "application/json" },
+  const response = await fetch("/api/chat", {
     method: "POST",
-    headers: {
-  "Content-Type": "application/json",
-  "x-api-key": import.meta.env.VITE_ANTHROPIC_API_KEY,
-  "anthropic-version": "2023-06-01",
-  "anthropic-dangerous-direct-browser-access": "true"
-},
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       model: "claude-sonnet-4-20250514",
       max_tokens: 1000,
@@ -112,9 +85,7 @@ function MessageBubble({ msg, accent }) {
   return (
     <div style={{ display: "flex", justifyContent: isUser ? "flex-end" : "flex-start", marginBottom: "14px" }}>
       {!isUser && (
-        <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: `${accent}22`, border: `1.5px solid ${accent}60`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "14px", marginRight: "8px", flexShrink: 0, marginTop: "2px" }}>
-          🤖
-        </div>
+        <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: `${accent}22`, border: `1.5px solid ${accent}60`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "14px", marginRight: "8px", flexShrink: 0, marginTop: "2px" }}>🤖</div>
       )}
       <div style={{ maxWidth: "82%", padding: "12px 16px", borderRadius: isUser ? "16px 16px 4px 16px" : "16px 16px 16px 4px", background: isUser ? `${accent}20` : "rgba(255,255,255,0.05)", border: `1px solid ${isUser ? accent + "50" : "rgba(255,255,255,0.08)"}`, fontSize: "12.5px", lineHeight: "1.7", color: isUser ? "#F1F5F9" : "#CBD5E1", whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
         {msg.content}
@@ -130,15 +101,12 @@ function AgentPanel({ agent }) {
   const [error, setError] = useState("");
   const bottomRef = useRef(null);
 
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, loading]);
+  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, loading]);
 
   const send = async () => {
     const text = input.trim();
     if (!text || loading) return;
-    setInput("");
-    setError("");
+    setInput(""); setError("");
     const userMsg = { role: "user", content: text };
     const newMessages = [...messages, userMsg];
     setMessages(newMessages);
@@ -148,26 +116,18 @@ function AgentPanel({ agent }) {
       setMessages([...newMessages, { role: "assistant", content: reply }]);
     } catch (e) {
       setError("Connection issue. Please try again.");
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   };
-
-  const clear = () => { setMessages([]); setError(""); };
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", background: "rgba(0,0,0,0.2)", borderRadius: "14px", border: `1px solid ${agent.accent}30`, overflow: "hidden" }}>
       <div style={{ padding: "14px 18px", background: `${agent.accent}12`, borderBottom: `1px solid ${agent.accent}25`, display: "flex", alignItems: "center", gap: "10px" }}>
-        <div style={{ fontSize: "22px", width: "40px", height: "40px", borderRadius: "10px", background: `${agent.accent}20`, border: `1.5px solid ${agent.accent}50`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-          {agent.emoji}
-        </div>
+        <div style={{ fontSize: "22px", width: "40px", height: "40px", borderRadius: "10px", background: `${agent.accent}20`, border: `1.5px solid ${agent.accent}50`, display: "flex", alignItems: "center", justifyContent: "center" }}>{agent.emoji}</div>
         <div style={{ flex: 1 }}>
           <div style={{ fontSize: "13px", fontWeight: "700", color: agent.accent, fontFamily: "sans-serif" }}>{agent.name}</div>
           <div style={{ fontSize: "10.5px", color: "#64748B", fontFamily: "sans-serif" }}>{agent.tagline}</div>
         </div>
-        {messages.length > 0 && (
-          <button onClick={clear} style={{ background: "transparent", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "6px", color: "#475569", fontSize: "10px", padding: "4px 10px", cursor: "pointer", fontFamily: "sans-serif" }}>Clear</button>
-        )}
+        {messages.length > 0 && <button onClick={() => { setMessages([]); setError(""); }} style={{ background: "transparent", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "6px", color: "#475569", fontSize: "10px", padding: "4px 10px", cursor: "pointer" }}>Clear</button>}
       </div>
       <div style={{ flex: 1, overflowY: "auto", padding: "16px", display: "flex", flexDirection: "column" }}>
         {messages.length === 0 && (
@@ -203,13 +163,11 @@ export default function BAMultiAgentSystem() {
   return (
     <div style={{ minHeight: "100vh", background: "#080C18", color: "#E2E8F0", fontFamily: "'Georgia', serif", display: "flex", flexDirection: "column" }}>
       <style>{`
-        @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
         @keyframes bounce { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-5px); } }
         @keyframes shimmer { 0% { background-position: -200% center; } 100% { background-position: 200% center; } }
         * { box-sizing: border-box; }
         textarea::placeholder { color: #334155; }
         ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
       `}</style>
       <div style={{ padding: "18px 24px 14px", borderBottom: "1px solid rgba(255,255,255,0.06)", background: "rgba(0,0,0,0.3)" }}>
@@ -230,30 +188,4 @@ export default function BAMultiAgentSystem() {
           {AGENTS.map((agent, i) => (
             <button key={agent.id} onClick={() => setActiveAgent(i)} style={{ display: "flex", alignItems: "center", gap: "7px", padding: "9px 14px", background: activeAgent === i ? `${agent.accent}18` : "transparent", border: `1.5px solid ${activeAgent === i ? agent.accent : "transparent"}`, borderBottom: "none", borderRadius: "10px 10px 0 0", cursor: "pointer", transition: "all 0.2s", position: "relative", bottom: "-1px" }}>
               <span style={{ fontSize: "15px" }}>{agent.emoji}</span>
-              <span style={{ fontSize: "11.5px", fontFamily: "sans-serif", fontWeight: activeAgent === i ? "600" : "400", color: activeAgent === i ? agent.accent : "#64748B", whiteSpace: "nowrap" }}>{agent.name}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-      <div style={{ flex: 1, padding: "20px 24px", maxWidth: "1100px", width: "100%", margin: "0 auto", display: "flex", flexDirection: "column", minHeight: 0 }}>
-        <div style={{ display: "flex", gap: "10px", marginBottom: "14px", flexWrap: "wrap" }}>
-          {[{ label: "Agent", value: AGENTS[activeAgent].name }, { label: "Role", value: AGENTS[activeAgent].tagline }, { label: "Model", value: "Claude Sonnet 4" }].map((item, i) => (
-            <div key={i} style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: "6px", padding: "5px 12px", fontSize: "10px", fontFamily: "sans-serif", color: "#64748B" }}>
-              <span style={{ color: "#334155" }}>{item.label}: </span>
-              <span style={{ color: "#94A3B8" }}>{item.value}</span>
-            </div>
-          ))}
-        </div>
-        <div style={{ flex: 1, minHeight: "420px", maxHeight: "calc(100vh - 280px)" }}>
-          <AgentPanel key={activeAgent} agent={AGENTS[activeAgent]} />
-        </div>
-      </div>
-      <div style={{ padding: "10px 24px", borderTop: "1px solid rgba(255,255,255,0.04)", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "6px" }}>
-        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-          {AGENTS.map(a => <span key={a.id} style={{ fontSize: "9px", fontFamily: "sans-serif", color: a.accent, background: `${a.accent}15`, padding: "2px 7px", borderRadius: "3px", opacity: 0.7 }}>{a.emoji} {a.name}</span>)}
-        </div>
-        <div style={{ fontSize: "9px", color: "#1E293B", fontFamily: "sans-serif" }}>Fari's BA Portfolio · Built with Claude API</div>
-      </div>
-    </div>
-  );
-}
+              <span style={{ fontSize: "11.5px", fontFamily: "sans-serif", fontWeight: activeAgent === i ? "600" : "400", color: activeAgent === i ? agen
