@@ -87,7 +87,7 @@ Start by introducing yourself as the stakeholder and stating your concern.`,
 ];
 
 async function callClaude(systemPrompt, messages) {
-  const response = await fetch("https://api.anthropic.com/v1/messages", {
+  headers: { "Content-Type": "application/json" },
     method: "POST",
     headers: {
   "Content-Type": "application/json",
